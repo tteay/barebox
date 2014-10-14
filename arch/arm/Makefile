@@ -92,11 +92,6 @@ board-$(CONFIG_MACH_MINI6410)			+= friendlyarm-mini6410
 board-$(CONFIG_MACH_PCM027)			+= phytec-phycore-pxa270
 board-$(CONFIG_MACH_TINY210)			+= friendlyarm-tiny210
 board-$(CONFIG_MACH_TINY6410)			+= friendlyarm-tiny6410
-board-$(CONFIG_MACH_IM98XXV1)			:= im98xxv1
-board-$(CONFIG_MACH_IM98XXV2)			:= im98xxv2
-board-$(CONFIG_MACH_IM98XXV3)			:= im98xxv3
-board-$(CONFIG_MACH_IM98XXV3_WVGA)		:= im98xxv3_wvga
-board-$(CONFIG_MACH_IM98XXV4)			:= im98xxv4
 board-$(CONFIG_MACH_IM98XXV4_WVGA)		:= im98xxv4_wvga
 
 machdirs := $(patsubst %,arch/arm/mach-%/,$(machine-y))

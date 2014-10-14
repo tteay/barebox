@@ -22,8 +22,11 @@
 #ifdef CONFIG_PBL_RELOCATABLE
 #define BASE	0
 #else
-#define BASE	(0x1ffe0000)
-//(TEXT_BASE - SZ_2M)
+#ifdef CONFIG_MACH_IM98XXV4_WVGA
+#define BASE	(0x1ffe0000)// set pbl image base at sram
+#else
+#define BASE	(TEXT_BASE - SZ_2M)
+#endif
 #endif
 
 OUTPUT_FORMAT("elf32-littlearm", "elf32-littlearm", "elf32-littlearm")

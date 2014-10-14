@@ -20,7 +20,6 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston,
 # MA 02111-1307 USA
 
-lwl-$(CONFIG_MACH_DO_LOWLEVEL_INIT) += platform.o
 lwl-$(CONFIG_MACH_IM98XXV4_WVGA) += board-lwl.o
 obj-$(CONFIG_MACH_IM98XXV4_WVGA) += board.o panels/
 

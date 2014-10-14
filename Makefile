@@ -182,10 +182,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
 
 HOSTCC       = gcc
 HOSTCXX      = g++
-HOSTCFLAGS   = -Wall -Wstrict-prototypes -gdwarf-2 -fomit-frame-pointer
-HOSTCXXFLAGS = -gdwarf-2
-#HOSTCFLAGS   = -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer
-#HOSTCXXFLAGS = -O2
+HOSTCFLAGS   = -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer
+HOSTCXXFLAGS = -O2
 
 # Decide whether to build built-in, modular, or both.
 # Normally, just do built-in.
@@ -445,7 +443,7 @@ endif # $(dot-config)
 include $(srctree)/arch/$(ARCH)/Makefile
 
 ifdef CONFIG_DEBUG_INFO
-CFLAGS		+=  -gdwarf-2
+CFLAGS		+= -g
 endif
 
 # Force gcc to behave correct even for buggy distributions

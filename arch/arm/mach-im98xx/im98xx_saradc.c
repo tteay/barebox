@@ -100,6 +100,7 @@ void im98xx_saradc_init(void)
 		sdelay(SDELAY_USEC_BASE);
 	}
 }
+device_initcall(im98xx_saradc_init);
 
 unsigned short im98xx_measure_adc_raw_data(void)
 {

@@ -505,7 +505,8 @@ void sdram_controller(int mode)
 	}
 
 	/* step.2 : Delay 200us for stable clock. */
-	im98xx_26MHz_halt(200, GPT1);
+	//im98xx_26MHz_halt(200, GPT1);
+	im98xx_udelay(200);
 
 //	for (i = 0 ; i < 20 ; i++)
 //		sdelay(416);
@@ -583,52 +584,6 @@ void sdram_controller(int mode)
  */
 static void sdrc_init(void)
 {
-#if 0
-	/* SDRAM software reset */
-	/* No idle ack and RESET enable */
-	writel(0x1A, SDRC_REG(SYSCONFIG));
-	sdelay(100);
-	/* No idle ack and RESET disable */
-	writel(0x18, SDRC_REG(SYSCONFIG));
-
-	/* SDRC Sharing register */
-	/* 32-bit SDRAM on data lane [31:0] - CS0 */
-	/* pin tri-stated = 1 */
-	writel(0x00000100, SDRC_REG(SHARING));
-
-	/* ----- SDRC Registers Configuration --------- */
-	/* SDRC_MCFG0 register */
-	writel(0x02584099, SDRC_REG(MCFG_0));
-
-	/* SDRC_RFR_CTRL0 register */
-	writel(0x54601, SDRC_REG(RFR_CTRL_0));
-
-	/* SDRC_ACTIM_CTRLA0 register */
-	writel(0xA29DB4C6, SDRC_REG(ACTIM_CTRLA_0));
-
-	/* SDRC_ACTIM_CTRLB0 register */
-	writel(0x12214, SDRC_REG(ACTIM_CTRLB_0));
-
-	/* Disble Power Down of CKE due to 1 CKE on combo part */
-	writel(0x00000081, SDRC_REG(POWER));
-
-	/* SDRC_MANUAL command register */
-	/* NOP command */
-	writel(0x00000000, SDRC_REG(MANUAL_0));
-	/* Precharge command */
-	writel(0x00000001, SDRC_REG(MANUAL_0));
-	/* Auto-refresh command */
-	writel(0x00000002, SDRC_REG(MANUAL_0));
-	/* Auto-refresh command */
-	writel(0x00000002, SDRC_REG(MANUAL_0));
-
-	/* SDRC MR0 register Burst length=4 */
-	writel(0x00000032, SDRC_REG(MR_0));
-
-	/* SDRC DLLA control register */
-	writel(0x0000000A, SDRC_REG(DLLA_CTRL));
-#endif
-
 /* SDRAM Controller reset */
 	sdram_controller(RESET);
 
@@ -646,73 +601,6 @@ static void sdrc_init(void)
 	return;
 }
 
-/**
- * @brief Do the pin muxing required for Board operation.
- * We enable ONLY the pins we require to set. OMAP provides pins which do not
- * have alternate modes. Such pins done need to be set.
- *
- * See @ref MUX_VAL for description of the muxing mode.
- *
- * @return void
- */
-#if 0
-static void mux_config(void)
-{
-	/* SDRC_D0 - SDRC_D31 default mux mode is mode0 */
-
-	/* GPMC */
-	MUX_VAL(CP(GPMC_A1), (IDIS | PTD | DIS | M0));
-	MUX_VAL(CP(GPMC_A2), (IDIS | PTD | DIS | M0));
-	MUX_VAL(CP(GPMC_A3), (IDIS | PTD | DIS | M0));
-	MUX_VAL(CP(GPMC_A4), (IDIS | PTD | DIS | M0));
-	MUX_VAL(CP(GPMC_A5), (IDIS | PTD | DIS | M0));
-	MUX_VAL(CP(GPMC_A6), (IDIS | PTD | DIS | M0));
-	MUX_VAL(CP(GPMC_A7), (IDIS | PTD | DIS | M0));
-	MUX_VAL(CP(GPMC_A8), (IDIS | PTD | DIS | M0));
-	MUX_VAL(CP(GPMC_A9), (IDIS | PTD | DIS | M0));
-	MUX_VAL(CP(GPMC_A10), (IDIS | PTD | DIS | M0));
-
-	/* D0-D7 default mux mode is mode0 */
-	MUX_VAL(CP(GPMC_D8), (IEN | PTD | DIS | M0));
-	MUX_VAL(CP(GPMC_D9), (IEN | PTD | DIS | M0));
-	MUX_VAL(CP(GPMC_D10), (IEN | PTD | DIS | M0));
-	MUX_VAL(CP(GPMC_D11), (IEN | PTD | DIS | M0));
-	MUX_VAL(CP(GPMC_D12), (IEN | PTD | DIS | M0));
-	MUX_VAL(CP(GPMC_D13), (IEN | PTD | DIS | M0));
-	MUX_VAL(CP(GPMC_D14), (IEN | PTD | DIS | M0));
-	MUX_VAL(CP(GPMC_D15), (IEN | PTD | DIS | M0));
-	MUX_VAL(CP(GPMC_CLK), (IDIS | PTD | DIS | M0));
-	/* GPMC_NADV_ALE default mux mode is mode0 */
-	/* GPMC_NOE default mux mode is mode0 */
-	/* GPMC_NWE default mux mode is mode0 */
-	/* GPMC_NBE0_CLE default mux mode is mode0 */
-	MUX_VAL(CP(GPMC_NBE0_CLE), (IDIS | PTD | DIS | M0));
-	MUX_VAL(CP(GPMC_NBE1), (IEN | PTD | DIS | M0));
-	MUX_VAL(CP(GPMC_NWP), (IEN | PTD | DIS | M0));
-	/* GPMC_WAIT0 default mux mode is mode0 */
-	MUX_VAL(CP(GPMC_WAIT1), (IEN | PTU | EN | M0));
-
-	/* SERIAL INTERFACE */
-	MUX_VAL(CP(UART3_CTS_RCTX), (IEN | PTD | EN | M0));
-	MUX_VAL(CP(UART3_RTS_SD), (IDIS | PTD | DIS | M0));
-	MUX_VAL(CP(UART3_RX_IRRX), (IEN | PTD | DIS | M0));
-	MUX_VAL(CP(UART3_TX_IRTX), (IDIS | PTD | DIS | M0));
-	MUX_VAL(CP(HSUSB0_CLK), (IEN | PTD | DIS | M0));
-	MUX_VAL(CP(HSUSB0_STP), (IDIS | PTU | EN | M0));
-	MUX_VAL(CP(HSUSB0_DIR), (IEN | PTD | DIS | M0));
-	MUX_VAL(CP(HSUSB0_NXT), (IEN | PTD | DIS | M0));
-	MUX_VAL(CP(HSUSB0_DATA0), (IEN | PTD | DIS | M0));
-	MUX_VAL(CP(HSUSB0_DATA1), (IEN | PTD | DIS | M0));
-	MUX_VAL(CP(HSUSB0_DATA2), (IEN | PTD | DIS | M0));
-	MUX_VAL(CP(HSUSB0_DATA3), (IEN | PTD | DIS | M0));
-	MUX_VAL(CP(HSUSB0_DATA4), (IEN | PTD | DIS | M0));
-	MUX_VAL(CP(HSUSB0_DATA5), (IEN | PTD | DIS | M0));
-	MUX_VAL(CP(HSUSB0_DATA6), (IEN | PTD | DIS | M0));
-	MUX_VAL(CP(HSUSB0_DATA7), (IEN | PTD | DIS | M0));
-	/* I2C1_SCL default mux mode is mode0 */
-	/* I2C1_SDA default mux mode is mode0 */
-}
-#endif
 
 /**
  * @brief Get the upper address of current execution
@@ -746,7 +634,7 @@ u32 running_in_sdram(void)
  *
  * @return void
  */
-void board_init(void)
+void board_init_lowlevel(void)
 {
 	int in_sdram = running_in_sdram();
 //	mux_config();

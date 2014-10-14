@@ -313,9 +313,9 @@ static int im98xx_devices_init(void)
 	printf("icon_block:\t%x\t%x\t\"%s\"\n", icon_block_info->offset,
 		icon_block_info->size, icon_block_info->mark_id);
 #endif
-/*
+
 	arm_add_mem_device("ram1", 0x1ffe0000, 128*1024);//sram
-	arm_add_mem_device("ram2", 0x407f2000, 128*1024);//imei
+/*	arm_add_mem_device("ram2", 0x407f2000, 128*1024);//imei
 	arm_add_mem_device("ram3", 0x40000000, 128*1024);//icon
 	arm_add_mem_device("ram0", 0x43800000, 192*1024*1024);//sdram
 */

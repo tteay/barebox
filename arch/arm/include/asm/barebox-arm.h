@@ -38,8 +38,6 @@ int	dram_init (void);
 extern char __exceptions_start[], __exceptions_stop[];
 
 void board_init_lowlevel(void);
-void arch_init_lowlevel(void);//+++lanbo+++,temp added for test
-
 uint32_t get_runtime_offset(void);
 
 void setup_c(void);

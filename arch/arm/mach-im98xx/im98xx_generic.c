@@ -53,7 +53,7 @@
 void __noreturn reset_cpu(ulong addr)
 {
 	/* FIXME: Enable WDT and cause reset */
-	//im98xx_a9_wdt_reset();//---lanbo---,for compile
+	im98xx_a9_wdt_reset();
 	hang();
 }
 EXPORT_SYMBOL(reset_cpu);

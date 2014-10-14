@@ -269,7 +269,7 @@ void start_linux(void *adr, int swap, unsigned long initrd_address,
 	}
 	architecture = armlinux_get_architecture();
 
-	//shutdown_barebox();
+	shutdown_barebox();
 	if (swap) {
 		u32 reg;
 		__asm__ __volatile__("mrc p15, 0, %0, c1, c0" : "=r" (reg));

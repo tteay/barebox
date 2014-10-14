@@ -1,9 +1,0 @@
-#!/bin/sh
-
-autoboot_timeout=0
-
-#bootargs="initcall_debug console=ttyS2,115200n8 mem=198M"
-bootargs="console=ttyS2,115200n8 mem=198M"
-#bootargs="console=null mem=198M"
-nand_parts="2M(InfomaxMisc),8M(modem),2M(FactoryData),4M(boot),4M(recovery),256M(system),188M(userdata),48M(cache)"
-kernel_preboot="pre_boot"

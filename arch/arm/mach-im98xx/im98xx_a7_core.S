@@ -36,41 +36,12 @@
  * MA 02111-1307 USA
  */
 
-#include <config.h>
-#include <mach/omap3-silicon.h>
-#ifdef CONFIG_ARCH_HAS_LOWLEVEL_INIT
-
 #ifdef CONFIG_ARCH_VECTOR_A7_CONFIG
 .globl a7_vector_sdram_start
 .globl a7_vector_sdram_end
 .globl a7_vector_debug_start
 .globl a7_vector_debug_end
-#endif
 
-.globl arch_init_lowlevel
-arch_init_lowlevel:
-	/* Setup a temporary stack so that we can call C functions */
-	ldr	sp,	SRAM_STACK
-        str     ip,	[sp]    /* stash old link register */
-        str     lr,	[sp]    /* stash current link register */
-	mov	ip,	lr	/* save link reg across call */
-	bl      a_init          /* Architecture init */
-        ldr     lr,	[sp]    /* restore current link register */
-        ldr     ip,	[sp]    /* restore save ip */
-
-	/* back to arch calling code */
-	mov	pc,	lr
-
-arch_start:
-	.word	arch_init_lowlevel
-
-//barebox_start:
-//	.word	start
-
-SRAM_STACK:
-	.word	IM98XX_SRAM_STACK
-
-#ifdef CONFIG_ARCH_VECTOR_A7_CONFIG
 a7_vector_sdram_start:
 	mov	pc,	#0x40000000 
 a7_vector_sdram_end:
@@ -79,5 +50,5 @@ a7_vector_debug_start:
 	mov	pc,	#0x0
 a7_vector_debug_end:
 #endif
-#endif	/* CONFIG_ARCH_HAS_LOWLEVEL_INIT */
+ 
 

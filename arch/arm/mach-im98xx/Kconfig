@@ -25,16 +25,8 @@ if ARCH_IM98XX
 menu "IM98XX Platform Features"
 
 config BOARDINFO
-	default "INFOMAX's iM98xx V1 Board" if MACH_IM98XXV1
-	default "INFOMAX's iM98xx V2 Board" if MACH_IM98XXV2
-	default "INFOMAX's iM98xx V3 Board" if MACH_IM98XXV3
-	default "INFOMAX's iM98xx V3 WVGA Board" if MACH_IM98XXV3_WVGA
-	default "INFOMAX's iM98xx V4 Board" if MACH_IM98XXV4
 	default "INFOMAX's iM98xx V4 WVGA Board" if MACH_IM98XXV4_WVGA
 
-config MACH_DO_LOWLEVEL_INIT
- 	bool
- 	
 choice
 	prompt "Select IM98XX platform"
 
@@ -55,7 +47,6 @@ config MACH_IM98XXV2
 config MACH_IM98XXV3
 	bool "Infomax's iM98xx V3 Board"
 	select MACH_HAS_LOWLEVEL_INIT
-	select MACH_DO_LOWLEVEL_INIT
 	select CONFIG_IM98XX_CONTROL_IF_I80
 	help
 	  Say Y here if you are using iM98xx V3 Board
@@ -77,7 +68,6 @@ config MACH_IM98XXV4
 config MACH_IM98XXV4_WVGA
 	bool "Infomax's iM98xx V4 WVGA Board"
 	select MACH_HAS_LOWLEVEL_INIT
-	select MACH_DO_LOWLEVEL_INIT
 	select CONFIG_IM98XX_CONTROL_IF_I80
 	help
 	  Say Y here if you are using iM98xx V4 WVGA Board
@@ -103,9 +93,7 @@ endchoice
 
 endmenu
 
-config ARCH_HAS_LOWLEVEL_INIT
- 	bool
- 	
+
 menu "IM98XX Features"
 	depends on ARCH_IM98XX
 
@@ -115,7 +103,6 @@ choice
 config MARCH_IM98XXV1
 	bool "IM98XXV1"
 	select CPU_ARM926T
-	select ARCH_HAS_LOWLEVEL_INIT
 	select IM98XX_CLOCK_SOURCE_S32K
 	help
 	  Say Y here if you are using Infomax's IM98XX V1 based platform
@@ -123,7 +110,6 @@ config MARCH_IM98XXV1
 config MARCH_IM98XXV2
 	bool "IM98XXV2"
 	select CPU_ARM926T
-	select ARCH_HAS_LOWLEVEL_INIT
 	select IM98XX_CLOCK_SOURCE_S32K
 	help
 	  Say Y here if you are using Infomax's IM98XX V2 based platform
@@ -131,7 +117,6 @@ config MARCH_IM98XXV2
 config MARCH_IM98XXV3
 	bool "IM98XXV3"
 	select CPU_ARM926T
-	select ARCH_HAS_LOWLEVEL_INIT
 	select IM98XX_CLOCK_SOURCE_S32K
 	help
 	  Say Y here if you are using Infomax's IM98XX V3 based platform
@@ -139,7 +124,6 @@ config MARCH_IM98XXV3
 config MARCH_IM98XXV3_WVGA
 	bool "IM98XXV3_WVGA"
 	select CPU_ARM926T
-	select ARCH_HAS_LOWLEVEL_INIT
 	select IM98XX_CLOCK_SOURCE_S32K
 	help
 	  Say Y here if you are using Infomax's IM98XX V3 WVGA based platform
@@ -147,7 +131,6 @@ config MARCH_IM98XXV3_WVGA
 config MARCH_IM98XXV4
 	bool "IM98XXV4"
 	select CPU_ARM926T
-	select ARCH_HAS_LOWLEVEL_INIT
 	select IM98XX_CLOCK_SOURCE_S32K
 	help
 	  Say Y here if you are using Infomax's IM98XX V4 based platform
@@ -155,7 +138,6 @@ config MARCH_IM98XXV4
 config MARCH_IM98XXV4_WVGA
 	bool "IM98XXV4_WVGA"
 	select CPU_ARM926T
-	select ARCH_HAS_LOWLEVEL_INIT
 	select IM98XX_CLOCK_SOURCE_S32K
 	help
 	  Say Y here if you are using Infomax's IM98XX V4 WVGA based platform
