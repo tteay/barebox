@@ -196,7 +196,8 @@ config BAREBOX_MAX_BARE_INIT_SIZE
 
 config HAVE_CONFIGURABLE_MEMORY_LAYOUT
 	bool
-
+#	default y
+	
 choice
 	prompt "select memory layout"
 	depends on HAVE_CONFIGURABLE_MEMORY_LAYOUT

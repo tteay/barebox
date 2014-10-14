@@ -14,4 +14,5 @@ obj-$(CONFIG_NAND_ORION)		+= nand_orion.o
 obj-$(CONFIG_NAND_ATMEL)		+= atmel_nand.o
 obj-$(CONFIG_NAND_S3C24XX)		+= nand_s3c24xx.o
 pbl-$(CONFIG_NAND_S3C24XX)		+= nand_s3c24xx.o
+obj-$(CONFIG_NAND_IM98XX)		+= nand_im98xx.o
 obj-$(CONFIG_NAND_MXS)			+= nand_mxs.o

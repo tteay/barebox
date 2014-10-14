@@ -413,6 +413,15 @@ config CMD_BOOTZ
 
 	  Usage: bootz FILE
 
+config CMD_ANDROIDBOOT
+	tristate
+	depends on ARM
+	prompt "androidboot"
+	help
+	  Boot android Image
+
+	  Usage: androidboot FILE
+
 config CMD_LINUX16
 	tristate
 	depends on X86

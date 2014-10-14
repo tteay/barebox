@@ -1,0 +1,65 @@
+#!/bin/sh
+
+. /env/config
+
+if [ -e /env/batt_cal_vmax ]; then
+	. /env/batt_cal_vmax
+fi
+
+if [ -e /env/batt_cal_vmin ]; then
+	. /env/batt_cal_vmin
+fi
+
+if [ -e /env/batt_cal_imax ]; then
+	. /env/batt_cal_imax
+fi
+
+if [ -e /env/bin/calibration_boot ]; then
+	kernel_preboot=boot
+	calibration_level=0
+fi
+
+if [ -e /env/bin/recovery_boot ]; then
+	kernel_preboot=boot
+fi
+
+if [ -e /env/bin/pre_boot ]; then
+	bootargs="$bootargs mtdparts=im98xx-nand:$nand_parts battery=$kernel_preboot vmax_adc=$vmax vmin_adc=$vmin imax_adc=$imax imin_adc=$imin"
+else
+	bootargs="$bootargs mtdparts=im98xx-nand:$nand_parts vmax_adc=$vmax vmin_adc=$vmin imax_adc=$imax imin_adc=$imin"
+fi
+
+if [ x$1 = xnet ]; then
+	if [ -z $2 ]; then
+		boot_image=boot.img
+	else
+		boot_image=$2
+	fi
+
+	tftp $boot_image android_bootimg || exit 1
+	bootimg android_bootimg
+fi
+
+if [ x$1 = xnand ]; then
+	if [ -e /env/bin/calibration_boot ]; then
+		echo "Enter calibration mode:"
+		echo "Barebox => Recovery partition is starting to load ..."
+		bootargs="$bootargs loglevel=$calibration_level"
+		bootimg /dev/nand0.recovery
+	elif [ -e /env/bin/recovery_boot ]; then
+		echo "Enter recovery mode:"
+		echo "Barebox => Recovery partition is starting to load ..."
+		bootargs="$bootargs androidboot.mode=im_recovery"
+		bootimg /dev/nand0.recovery
+	elif [ -e /env/bin/rtc_boot ]; then
+		echo "Enter rtc alarm mode boot up procedure:"
+		echo "Barebox => Kernel partition is starting to load ..."
+		bootargs="$bootargs androidboot.mode=alarm_rtc"
+		bootimg /dev/nand0.boot
+	else
+		echo "System boot up procedure:"
+		echo "Barebox => Kernel partition is starting to load ..."
+		bootimg /dev/nand0.boot
+	fi
+fi
+

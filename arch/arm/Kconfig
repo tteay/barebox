@@ -166,6 +166,9 @@ config ARCH_S3C24xx
 	select CPU_ARM920T
 	select GENERIC_GPIO
 
+config ARCH_IM98XX
+	bool "INFOMAX IM98XX"
+	
 config ARCH_S5PCxx
 	bool "Samsung S5PC110, S5PV210"
 	select ARCH_SAMSUNG
@@ -249,6 +252,7 @@ source arch/arm/mach-vexpress/Kconfig
 source arch/arm/mach-tegra/Kconfig
 source arch/arm/mach-uemd/Kconfig
 source arch/arm/mach-zynq/Kconfig
+source arch/arm/mach-im98xx/Kconfig
 
 config ARM_ASM_UNIFIED
 	bool

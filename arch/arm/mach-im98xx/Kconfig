@@ -1,0 +1,691 @@
+#
+# OMAP Architecture specific features
+#
+# (C) Copyright 2008
+# Texas Instruments, <www.ti.com>
+# Nishanth Menon <x0nishan@ti.com>
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation; either version 2 of
+# the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+# MA 02111-1307 USA
+
+if ARCH_IM98XX
+
+menu "IM98XX Platform Features"
+
+config BOARDINFO
+	default "INFOMAX's iM98xx V1 Board" if MACH_IM98XXV1
+	default "INFOMAX's iM98xx V2 Board" if MACH_IM98XXV2
+	default "INFOMAX's iM98xx V3 Board" if MACH_IM98XXV3
+	default "INFOMAX's iM98xx V3 WVGA Board" if MACH_IM98XXV3_WVGA
+	default "INFOMAX's iM98xx V4 Board" if MACH_IM98XXV4
+	default "INFOMAX's iM98xx V4 WVGA Board" if MACH_IM98XXV4_WVGA
+
+config MACH_DO_LOWLEVEL_INIT
+ 	bool
+ 	
+choice
+	prompt "Select IM98XX platform"
+
+config MACH_IM98XXV1
+	bool "Infomax's iM98xx V1 Board"
+	select MACH_HAS_LOWLEVEL_INIT
+	select CONFIG_IM98XX_CONTROL_IF_I80
+	help
+	  Say Y here if you are using iM98xx V1 Board
+
+config MACH_IM98XXV2
+	bool "Infomax's iM98xx V2 Board"
+	select MACH_HAS_LOWLEVEL_INIT
+	select CONFIG_IM98XX_CONTROL_IF_I80
+	help
+	  Say Y here if you are using iM98xx V2 Board
+
+config MACH_IM98XXV3
+	bool "Infomax's iM98xx V3 Board"
+	select MACH_HAS_LOWLEVEL_INIT
+	select MACH_DO_LOWLEVEL_INIT
+	select CONFIG_IM98XX_CONTROL_IF_I80
+	help
+	  Say Y here if you are using iM98xx V3 Board
+
+config MACH_IM98XXV3_WVGA
+	bool "Infomax's iM98xx V3 WVGA Board"
+	select MACH_HAS_LOWLEVEL_INIT
+	select CONFIG_IM98XX_CONTROL_IF_I80
+	help
+	  Say Y here if you are using iM98xx V3 WVGA Board
+
+config MACH_IM98XXV4
+	bool "Infomax's iM98xx V4 Board"
+	select MACH_HAS_LOWLEVEL_INIT
+	select CONFIG_IM98XX_CONTROL_IF_I80
+	help
+	  Say Y here if you are using iM98xx V4 Board
+
+config MACH_IM98XXV4_WVGA
+	bool "Infomax's iM98xx V4 WVGA Board"
+	select MACH_HAS_LOWLEVEL_INIT
+	select MACH_DO_LOWLEVEL_INIT
+	select CONFIG_IM98XX_CONTROL_IF_I80
+	help
+	  Say Y here if you are using iM98xx V4 WVGA Board
+
+endchoice
+
+choice
+	prompt "Select Panel Interface"
+
+config IM98XX_CONTROL_IF_I80
+	bool "I80 interface"
+	select CONFIG_IM98XX_CONTROL_IF_I80
+	help
+	  Say Y here if you are using iM98xx V1 Board
+
+config IM98XX_CONTROL_IF_RGB
+	bool "RGB interface"
+	select CONFIG_IM98XX_CONTROL_IF_RGB
+	help
+	  Say Y here if you are using iM98xx V1 Board
+
+endchoice
+
+endmenu
+
+config ARCH_HAS_LOWLEVEL_INIT
+ 	bool
+ 	
+menu "IM98XX Features"
+	depends on ARCH_IM98XX
+
+choice
+	prompt "Select IM98XX Variant"
+
+config MARCH_IM98XXV1
+	bool "IM98XXV1"
+	select CPU_ARM926T
+	select ARCH_HAS_LOWLEVEL_INIT
+	select IM98XX_CLOCK_SOURCE_S32K
+	help
+	  Say Y here if you are using Infomax's IM98XX V1 based platform
+
+config MARCH_IM98XXV2
+	bool "IM98XXV2"
+	select CPU_ARM926T
+	select ARCH_HAS_LOWLEVEL_INIT
+	select IM98XX_CLOCK_SOURCE_S32K
+	help
+	  Say Y here if you are using Infomax's IM98XX V2 based platform
+
+config MARCH_IM98XXV3
+	bool "IM98XXV3"
+	select CPU_ARM926T
+	select ARCH_HAS_LOWLEVEL_INIT
+	select IM98XX_CLOCK_SOURCE_S32K
+	help
+	  Say Y here if you are using Infomax's IM98XX V3 based platform
+
+config MARCH_IM98XXV3_WVGA
+	bool "IM98XXV3_WVGA"
+	select CPU_ARM926T
+	select ARCH_HAS_LOWLEVEL_INIT
+	select IM98XX_CLOCK_SOURCE_S32K
+	help
+	  Say Y here if you are using Infomax's IM98XX V3 WVGA based platform
+
+config MARCH_IM98XXV4
+	bool "IM98XXV4"
+	select CPU_ARM926T
+	select ARCH_HAS_LOWLEVEL_INIT
+	select IM98XX_CLOCK_SOURCE_S32K
+	help
+	  Say Y here if you are using Infomax's IM98XX V4 based platform
+
+config MARCH_IM98XXV4_WVGA
+	bool "IM98XXV4_WVGA"
+	select CPU_ARM926T
+	select ARCH_HAS_LOWLEVEL_INIT
+	select IM98XX_CLOCK_SOURCE_S32K
+	help
+	  Say Y here if you are using Infomax's IM98XX V4 WVGA based platform
+
+endchoice
+
+config IM98XX_CLOCK_SOURCE_S32K
+ 	bool
+
+config IM98XX_CLOCK_CONFIG
+	prompt "Clock Configuration"
+	bool
+	depends on ARCH_IM98XX
+	default y
+	help
+	  Say Y here if you like to have IM98XX Clock configuration done.
+
+menu "System Clock: ARM9/HCLK_Divisor/XMEM/ARM7"
+
+choice
+	prompt "ARM9 : ARM9 Core System Clock"
+
+config IM98XX_ARM9_CLOCK_416_CONFIG
+	bool "ARM9: 416MHz"
+	select CONFIG_IM98XX_ARM9_CLOCK_416_CONFIG
+
+config IM98XX_ARM9_CLOCK_494_CONFIG
+	bool "ARM9: 494MHz"
+	select CONFIG_IM98XX_ARM9_CLOCK_494_CONFIG
+
+config IM98XX_ARM9_CLOCK_520_CONFIG
+	bool "ARM9: 520MHz"
+	select CONFIG_IM98XX_ARM9_CLOCK_520_CONFIG
+
+config IM98XX_ARM9_CLOCK_624_CONFIG
+	bool "ARM9: 624MHz"
+	select CONFIG_IM98XX_ARM9_CLOCK_624_CONFIG
+
+config IM98XX_ARM9_CLOCK_650_CONFIG
+        bool "ARM9: 650MHz"
+        select CONFIG_IM98XX_ARM9_CLOCK_650_CONFIG
+
+config IM98XX_ARM9_CLOCK_702_CONFIG
+	bool "ARM9: 702MHz"
+	select CONFIG_IM98XX_ARM9_CLOCK_702_CONFIG
+
+config IM98XX_ARM9_CLOCK_754_CONFIG
+        bool "ARM9: 754MHz"
+        select CONFIG_IM98XX_ARM9_CLOCK_754_CONFIG
+
+config IM98XX_ARM9_CLOCK_780_CONFIG
+        bool "ARM9: 780MHz"
+        select CONFIG_IM98XX_ARM9_CLOCK_780_CONFIG
+
+config IM98XX_ARM9_CLOCK_728_CONFIG
+        bool "ARM9: 728MHz"
+        select CONFIG_IM98XX_ARM9_CLOCK_728_CONFIG
+
+config IM98XX_ARM9_CLOCK_806_CONFIG
+        bool "ARM9: 806MHz"
+        select CONFIG_IM98XX_ARM9_CLOCK_806_CONFIG
+
+config IM98XX_ARM9_CLOCK_910_CONFIG
+        bool "ARM9: 910MHz"
+        select CONFIG_IM98XX_ARM9_CLOCK_910_CONFIG
+
+endchoice
+
+choice
+	prompt "HCLK : ARM9 AHB System Clock Divisor"
+
+config IM98XX_ARM9_HCLK_DIV1_CONFIG
+	bool "ARM9 AHB: divided by 1"
+	select CONFIG_IM98XX_ARM9_HCLK_DIV1_CONFIG
+
+config IM98XX_ARM9_HCLK_DIV2_CONFIG
+	bool "ARM9 AHB: divided by 2"
+	select CONFIG_IM98XX_ARM9_HCLK_DIV2_CONFIG
+
+config IM98XX_ARM9_HCLK_DIV3_CONFIG
+	bool "ARM9 AHB: divided by 3"
+	select CONFIG_IM98XX_ARM9_HCLK_DIV3_CONFIG
+
+config IM98XX_ARM9_HCLK_DIV4_CONFIG
+	bool "ARM9 AHB: divided by 4"
+	select CONFIG_IM98XX_ARM9_HCLK_DIV4_CONFIG
+
+config IM98XX_ARM9_HCLK_DIV6_CONFIG
+	bool "ARM9 AHB: divided by 6"
+	select CONFIG_IM98XX_ARM9_HCLK_DIV6_CONFIG
+
+config IM98XX_ARM9_HCLK_DIV8_CONFIG
+	bool "ARM9 AHB: divided by 8"
+	select CONFIG_IM98XX_ARM9_HCLK_DIV8_CONFIG
+
+endchoice
+
+choice
+	prompt "XMEM : External Memory Controller Clock"
+
+config IM98XX_XMEM_CLOCK_78_CONFIG
+	bool "XMEM: 78MHz"
+	select CONFIG_IM98XX_XMEM_CLOCK_78_CONFIG
+
+config IM98XX_XMEM_CLOCK_104_CONFIG
+	bool "XMEM: 104MHz"
+	select CONFIG_IM98XX_XMEM_CLOCK_104_CONFIG
+
+config IM98XX_XMEM_CLOCK_130_CONFIG
+	bool "XMEM: 130MHz"
+	select CONFIG_IM98XX_XMEM_CLOCK_130_CONFIG
+
+config IM98XX_XMEM_CLOCK_143_CONFIG
+	bool "XMEM: 143MHz"
+	select CONFIG_IM98XX_XMEM_CLOCK_143_CONFIG
+
+config IM98XX_XMEM_CLOCK_156_CONFIG
+	bool "XMEM: 156MHz"
+	select CONFIG_IM98XX_XMEM_CLOCK_156_CONFIG
+
+config IM98XX_XMEM_CLOCK_169_CONFIG
+	bool "XMEM: 169MHz"
+	select CONFIG_IM98XX_XMEM_CLOCK_169_CONFIG
+
+config IM98XX_XMEM_CLOCK_182_CONFIG
+	bool "XMEM: 182MHz"
+	select CONFIG_IM98XX_XMEM_CLOCK_182_CONFIG
+
+config IM98XX_XMEM_CLOCK_198_CONFIG
+	bool "XMEM: 198MHz"
+	select CONFIG_IM98XX_XMEM_CLOCK_198_CONFIG
+
+# config IM98XX_XMEM_CLOCK_208_CONFIG
+# 	bool "XMEM: 208MHz"
+# 	select CONFIG_IM98XX_XMEM_CLOCK_208_CONFIG
+
+endchoice
+
+choice
+	prompt "ARM7 : ARM7 Core System Clock"
+
+config IM98XX_ARM7_CLOCK_130_CONFIG
+	bool "ARM7: 130MHz"
+	select CONFIG_IM98XX_ARM7_CLOCK_130_CONFIG
+
+config IM98XX_ARM7_CLOCK_143_CONFIG
+	bool "ARM7: 143MHz" 
+	select CONFIG_IM98XX_ARM7_CLOCK_143_CONFIG
+
+config IM98XX_ARM7_CLOCK_156_CONFIG
+	bool "ARM7: 156MHz" 
+	select CONFIG_IM98XX_ARM7_CLOCK_156_CONFIG
+
+endchoice
+
+endmenu
+
+menu "LCM Backlight Configuration:"
+
+choice
+	prompt "Select Backlight Control Source: "
+
+config IM98XX_PWL_CTL_BACKLIGHT_CONFIG
+	bool "PWL"
+	select CONFIG_PWL_TOGGLE_BACKLIGHT_CONFIG
+
+config IM98XX_GPIO18_CTL_BACKLIGHT_CONFIG
+	bool "GPIO18"
+	select CONFIG_GPIO18_TOGGLE_BACKLIGHT_CONFIG
+
+endchoice
+
+endmenu
+
+menu "System Memory Configuration:"
+
+choice
+	prompt "SDRAM Controller Driver Strength"
+
+config IM98XX_CTL_DRIVER_STRENGTH_FUL_CONFIG
+	bool "Full"
+	select CONFIG_IM98XX_CTL_DRIVER_STRENGTH_FUL_CONFIG
+
+config IM98XX_CTL_DRIVER_STRENGTH_HAF_CONFIG
+	bool "Half"
+	select CONFIG_IM98XX_CTL_DRIVER_STRENGTH_HAF_CONFIG
+
+config IM98XX_CTL_DRIVER_STRENGTH_QUA_CONFIG
+	bool "Quarter"
+	select CONFIG_IM98XX_CTL_DRIVER_STRENGTH_QUA_CONFIG
+
+config IM98XX_CTL_DRIVER_STRENGTH_OCT_CONFIG
+	bool "Low"
+	select CONFIG_IM98XX_CTL_DRIVER_STRENGTH_OCT_CONFIG
+
+endchoice
+
+choice
+	prompt "SDRAM Device Type"
+
+config SDRAM_DEVICE_HYNIX_H8BCS0UN0MCR_CONFIG
+	bool "Hynix H8BCS0UN0MCR-4EM Mobile DDR SDRAM"
+	select CONFIG_SDRAM_DEVICE_HYNIX_H8BCS0UN0MCR_CONFIG
+
+config SDRAM_DEVICE_HYNIX_H9DA4GH2GJAMCR_CONFIG
+	bool "Hynix H9DA4GH2GJAMCR Mobile DDR SDRAM"
+	select CONFIG_SDRAM_DEVICE_HYNIX_H9DA4GH2GJAMCR_CONFIG
+
+config SDRAM_DEVICE_SAMSUNG_K524G2GACG_CONFIG
+	bool "Samsung K524G2GACG-B050 Mobile DDR SDRAM"
+	select CONFIG_SDRAM_DEVICE_SAMSUNG_K524G2GACG_CONFIG
+
+config SDRAM_DEVICE_SPECTEK_4G48MZAP_5BT_CONFIG
+	bool "Spectek 4G48MZAP-5BT Mobile DDR SDRAM"
+	select CONFIG_SDRAM_DEVICE_SPECTEK_4G48MZAP_5BT_CONFIG
+
+config SDRAM_DEVICE_MICRON_MT29C4G48MAZBAAKS_5WT_CONFIG
+	bool "Micron MT29C4G48MAZBAAKS-5 WT Mobile DDR SDRAM"
+	select CONFIG_SDRAM_DEVICE_MICRON_MT29C4G48MAZBAAKS_5WT_CONFIG
+
+endchoice
+
+endmenu
+
+menu "System DC/DC Power Supply:"
+
+choice
+	prompt "Select IM88XX Variant"
+
+config MARCH_2504D
+	bool "2504D"
+	select CONFIG_MARCH_2504D
+
+config MARCH_2504E
+	bool "2504E"
+	select CONFIG_MARCH_2504E
+
+endchoice
+
+choice
+	prompt "iM98xx VIO18 DC/DC"
+
+config VIO18_1750
+	bool "1.75V"
+	select CONFIG_VIO18_1750
+
+config VIO18_1800
+	bool "1.8V"
+	select CONFIG_VIO18_1800
+
+config VIO18_1850
+	bool "1.85V"
+	select CONFIG_VIO18_1850
+
+config VIO18_1900
+	bool "1.9V"
+	select CONFIG_VIO18_1900
+
+endchoice
+
+choice
+	prompt "iM98xx VSYS DC/DC"
+
+config VSYS_1000
+	bool "1.000V"
+	select CONFIG_VSYS_1000
+
+config VSYS_1025
+	bool "1.025V"
+	depends on MARCH_2504E
+	select CONFIG_VSYS_1025
+
+config VSYS_1050
+	bool "1.050V"
+	select CONFIG_VSYS_1050
+
+config VSYS_1075
+	bool "1.075V"
+	depends on MARCH_2504E
+	select CONFIG_VSYS_1075
+
+config VSYS_1100
+	bool "1.100V"
+	select CONFIG_VSYS_1100
+
+config VSYS_1125
+	bool "1.125V"
+	depends on MARCH_2504E
+	select CONFIG_VSYS_1125
+
+config VSYS_1150
+	bool "1.150V"
+	select CONFIG_VSYS_1150
+
+config VSYS_1175
+	bool "1.175V"
+	depends on MARCH_2504E
+	select CONFIG_VSYS_1175
+
+config VSYS_1200
+	bool "1.20V"
+	select CONFIG_VSYS_1200
+
+config VSYS_1225
+	bool "1.225V"
+	depends on MARCH_2504E
+	select CONFIG_VSYS_1225
+
+config VSYS_1250
+	bool "1.25V"
+	select CONFIG_VSYS_1250
+
+config VSYS_1275
+	bool "1.275V"
+	depends on MARCH_2504E
+	select CONFIG_VSYS_1275
+
+config VSYS_1300
+	bool "1.30V"
+	select CONFIG_VSYS_1300
+
+config VSYS_1350
+	bool "1.35V"
+	depends on MARCH_2504D
+	select CONFIG_VSYS_1350
+
+endchoice
+
+choice
+	prompt "iM98xx VARM9 normal DC/DC"
+
+config VARM9_NORMAL_1000
+	bool "1.0V"
+	depends on MARCH_2504D
+	select CONFIG_VARM9_NORMAL_1000
+
+config VARM9_NORMAL_1050
+	bool "1.05V"
+	depends on MARCH_2504D
+	select CONFIG_VARM9_NORMAL_1050
+
+config VARM9_NORMAL_1100
+	bool "1.1V"
+	depends on MARCH_2504D
+	select CONFIG_VARM9_NORMAL_1100
+
+config VARM9_NORMAL_1150
+	bool "1.15V"
+	depends on MARCH_2504D
+	select CONFIG_VARM9_NORMAL_1150
+
+config VARM9_NORMAL_1200
+	bool "1.2V"
+	depends on MARCH_2504D
+	select CONFIG_VARM9_NORMAL_1200
+
+config VARM9_NORMAL_1250
+	bool "1.25V"
+	depends on MARCH_2504D
+	select CONFIG_VARM9_NORMAL_1250
+
+config VARM9_NORMAL_1300
+	bool "1.3V"
+	depends on MARCH_2504D
+	select CONFIG_VARM9_NORMAL_1300
+
+config VARM9_NORMAL_1350
+	bool "1.35V"
+	depends on MARCH_2504D
+	select CONFIG_VARM9_NORMAL_1350
+
+config VARM9_NORMAL_1400
+	bool "1.4V"
+	select CONFIG_VARM9_NORMAL_1400
+
+config VARM9_NORMAL_1430
+	bool "1.43V"
+	depends on MARCH_2504E
+	select CONFIG_VARM9_NORMAL_1430
+
+config VARM9_NORMAL_1450
+        bool "1.45V"
+	depends on MARCH_2504D
+        select CONFIG_VARM9_NORMAL_1450
+
+config VARM9_NORMAL_1460
+	bool "1.46V"
+	depends on MARCH_2504E
+	select CONFIG_VARM9_NORMAL_1460
+
+config VARM9_NORMAL_1490
+	bool "1.49V"
+	depends on MARCH_2504E
+	select CONFIG_VARM9_NORMAL_1490
+
+config VARM9_NORMAL_1520
+        bool "1.52V"
+	depends on MARCH_2504E
+        select CONFIG_VARM9_NORMAL_1520
+
+config VARM9_NORMAL_1550
+        bool "1.55V"
+	depends on MARCH_2504E
+        select CONFIG_VARM9_NORMAL_1550
+
+config VARM9_NORMAL_1580
+	bool "1.58V"
+	depends on MARCH_2504E
+	select CONFIG_VARM9_NORMAL_1580
+
+config VARM9_NORMAL_1610
+	bool "1.61V"
+	depends on MARCH_2504E
+	select CONFIG_VARM9_NORMAL_1610
+
+endchoice
+
+choice
+	prompt "iM98xx VARM9 sleep DC/DC"
+
+config VARM9_SLEEP_0920
+	bool "0.92V"
+	depends on MARCH_2504E
+	select CONFIG_VARM9_SLEEP_0920
+
+config VARM9_SLEEP_0950
+	bool "0.95V"
+	depends on MARCH_2504E
+	select CONFIG_VARM9_SLEEP_0950
+
+config VARM9_SLEEP_0980
+	bool "0.98V"
+	depends on MARCH_2504E
+	select CONFIG_VARM9_SLEEP_0980
+
+config VARM9_SLEEP_1000
+	bool "1.0V"
+	depends on MARCH_2504D
+	select CONFIG_VARM9_SLEEP_1000
+
+config VARM9_SLEEP_1010
+	bool "1.01V"
+	depends on MARCH_2504E
+	select CONFIG_VARM9_SLEEP_1010
+
+config VARM9_SLEEP_1040
+	bool "1.04V"
+	depends on MARCH_2504E
+	select CONFIG_VARM9_SLEEP_1040
+
+config VARM9_SLEEP_1050
+	bool "1.05V"
+	depends on MARCH_2504D
+	select CONFIG_VARM9_SLEEP_1050
+
+config VARM9_SLEEP_1070
+	bool "1.07V"
+	depends on MARCH_2504E
+	select CONFIG_VARM9_SLEEP_1070
+
+config VARM9_SLEEP_1100
+	bool "1.10V"
+	select CONFIG_VARM9_SLEEP_1100
+
+config VARM9_SLEEP_1130
+	bool "1.13V"
+	depends on MARCH_2504E
+	select CONFIG_VARM9_SLEEP_1130
+
+config VARM9_SLEEP_1150
+	bool "1.15V"
+	depends on MARCH_2504D
+	select CONFIG_VARM9_SLEEP_1150
+
+config VARM9_SLEEP_1200
+	bool "1.2V"
+	depends on MARCH_2504D
+	select CONFIG_VARM9_SLEEP_1200
+
+config VARM9_SLEEP_1250
+	bool "1.25V"
+	depends on MARCH_2504D
+	select CONFIG_VARM9_SLEEP_1250
+
+config VARM9_SLEEP_1300
+	bool "1.3V"
+	depends on MARCH_2504D
+	select CONFIG_VARM9_SLEEP_1300
+
+config VARM9_SLEEP_1350
+	bool "1.35V"
+	depends on MARCH_2504D
+	select CONFIG_VARM9_SLEEP_1350
+
+endchoice
+
+endmenu
+
+config IM98XX_HALT_TIMER_CONFIG
+	prompt "Halt mode Timer Configuration"
+	bool
+	depends on ARCH_IM98XX
+	default y
+	help
+	  Say Y here if you like to have IM98XX Halt mode Timer configuration done.
+
+config IM98XX_BL_PM_CONFIG
+	prompt "Boot-loader Power Management"
+	bool
+	depends on ARCH_IM98XX
+	default y
+	help
+	  Say Y here if you like to have IM98XX Power management done.
+
+config IM98XX_SARADC_CONFIG
+	prompt "IM98XX SAR-ADC (AutoTrim/Charger) Configuration"
+	bool
+	depends on ARCH_IM98XX
+	default y
+	help
+	  Say Y here if you like to have IM98XX SAR-ADC driver configuration done.
+
+config ARCH_VECTOR_A7_CONFIG
+	prompt "ARM7 Vector SDRAM Download"
+	bool
+	depends on ARCH_IM98XX
+	default y
+	help
+	  Say Y here if you like to have IM98XX ARM7 Vector SDRAM done.
+
+endmenu
+
+endif
