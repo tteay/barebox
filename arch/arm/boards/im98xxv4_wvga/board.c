@@ -94,6 +94,9 @@ static struct device_d im98xx_serial_device = {
  */
 static int im98xx_console_init(void)
 {
+	barebox_set_model("Infomax im98xxv4");
+	barebox_set_hostname("im98xxv4");
+
 	/* Register the serial port */
 	return platform_device_register(&im98xx_serial_device);
 }
@@ -185,7 +188,7 @@ static struct device_d network_dev = {
 	//.size		= 0x1000000,	/* area size */
 };
 
-static int im98xx_mem_init(void)
+static void im98xx_mem_init(void)
 {//we already init sdram,so no need init it here
 	arm_add_mem_device("ram0", 0x40800000, 0xF800000);//sdram 198*1024*1024,
 	arm_add_mem_device("ram1", 0x1ffe0000, 128*1024);//sram
@@ -321,7 +324,7 @@ static int im98xx_devices_init(void)
 */
 	armlinux_set_bootparams((void *)(0x40800000 + 0x100));//sdram base:0x40800000
 	armlinux_set_architecture(MACH_TYPE_IM98XXV4_WVGA);
-failed:
+
 	return ret;
 }
 device_initcall(im98xx_devices_init);
