@@ -77,6 +77,30 @@ static struct nand_ecclayout im98xx_hw_eccoob_page = {
 	}
 };
 
+static struct nand_ecclayout im98xx_hw_eccoob_page_4K = {
+	.eccbytes = 80,
+	.eccpos = {
+		  6,   7,   8,   9,  10,  11,  12,  13,  14,  15,
+		 22,  23,  24,  25,  26,  27,  28,  29,  30,  31,
+		 38,  39,  40,  41,  42,  43,  44,  45,  46,  47,
+		 54,  55,  56,  57,  58,  59,  60,  61,  62,  63,
+		 70,  71,  72,  73,  74,  75,  76,  77,  78,  79,
+		 86,  87,  88,  89,  90,  91,  92,  93,  94,  95,
+		102, 103, 104, 105, 106, 107, 108, 109, 110, 111,
+		118, 119, 120, 121, 122, 123, 124, 125, 126, 127},
+
+	.oobfree = {
+		{ .offset = 2,   .length = 4 },
+		{ .offset = 16,  .length = 6 },
+		{ .offset = 32,  .length = 6 },
+		{ .offset = 48,  .length = 6 },
+		{ .offset = 64,  .length = 6 },
+		{ .offset = 80,  .length = 6 },
+		{ .offset = 96,  .length = 6 },
+		{ .offset = 112, .length = 6 },
+	}
+};
+
 void print_data16(u_char *buf, int len) {
 	int i = len;
 	u_char *p;
@@ -122,7 +146,7 @@ static void __nand_boot_init config_nand_controller(void)
 	*HIF_NAND_REG = 0x13fffff;
 //	printf("RS_CTL_REG: 0x%08x\n", *RS_CTL_REG);
 	*GPIO16_REG = 0x0;
-	*GPIO16_REG = 0x2;
+	*GPIO16_REG = 0xa;//0x2;//---lanbo+++.for not wr protect
 }
 
 /**
@@ -181,7 +205,7 @@ static void im98xx_nand_hwcontrol(struct mtd_info *mtd, int cmd, unsigned int ct
  *
  * @return  0 if device is busy else 1
  */
-#if 0
+#if 1
 static int im98xx_nand_dev_ready(struct mtd_info *mtd)
 {
 	struct nand_chip *chip = mtd->priv;
@@ -551,7 +575,7 @@ static int im98xx_nand_read_page_ecc_syndrome(struct mtd_info *mtd, struct nand_
  * The hw generator calculates the error syndrome automatically. Therefor
  * we need a special oob layout and handling.
  */
-static void im98xx_nand_write_page_ecc_syndrome(struct mtd_info *mtd,
+static int im98xx_nand_write_page_ecc_syndrome(struct mtd_info *mtd,
 					struct nand_chip *chip, const uint8_t *buf)
 {
 	int eccsize = chip->ecc.size;
@@ -587,7 +611,61 @@ static void im98xx_nand_write_page_ecc_syndrome(struct mtd_info *mtd,
 		chip->write_buf(mtd, oob, eccbytes);
 		oob += eccbytes;
 	}
+	return 0;
 }
+#if 0
+static int im98xx_ecc_read_oob(struct mtd_info *mtd, struct nand_chip *chip, int page, int sndcmd)
+{
+	register unsigned char *bufpoi = chip->oob_poi;
+	chip->cmdfunc(mtd, NAND_CMD_READOOB, 0, page);
+	chip->waitfunc(mtd, chip);
+	chip->cmd_ctrl(mtd, NAND_CMD_READ0, (NAND_CTRL_CLE | NAND_CTRL_CHANGE));
+	chip->read_buf(mtd, bufpoi, mtd->oobsize);
+
+	return 0;
+}
+
+static int im98xx_ecc_write_oob(struct mtd_info *mtd, struct nand_chip *chip, int page)
+{
+#if 0
+	register unsigned char *bufpoi = chip->oob_poi;
+	chip->cmdfunc(mtd, NAND_CMD_SEQIN, mtd->writesize, page);
+	chip->write_buf(mtd, bufpoi, mtd->oobsize);
+	chip->cmdfunc(mtd, NAND_CMD_PAGEPROG, -1, -1);
+	return ( (chip->waitfunc(mtd, chip) & NAND_STATUS_FAIL)? -EIO:0 );
+#else
+	register unsigned long status, sndcmd, steps = chip->ecc.steps;
+	register unsigned long pos, oob_pos;
+	int len;
+	register unsigned char *bufpoi = chip->oob_poi;
+	int eccsize = chip->ecc.size;
+	uint32_t fill = 0xFFFFFFFF;
+	unsigned long chunk = chip->ecc.prepad + chip->ecc.bytes + chip->ecc.postpad;
+
+	for (oob_pos = mtd->writesize, status = sndcmd = pos = 0; steps; steps--, bufpoi += chunk, pos += eccsize, oob_pos += chunk) {
+		if (sndcmd)
+			chip->cmdfunc(mtd, NAND_CMD_RNDIN, pos, -1);
+		else
+			sndcmd = 1;
+		chip->ecc.hwctl(mtd, NAND_ECC_WRITE);
+
+		len = eccsize;
+		while (len > 0) {
+			int num = min_t(int, len, 4);
+			chip->write_buf(mtd, (uint8_t *)&fill, num);
+			len -= num;
+		}
+		chip->cmdfunc(mtd, NAND_CMD_RNDIN, oob_pos, -1);
+		chip->write_buf(mtd, bufpoi, chip->ecc.prepad);
+		chip->write_buf(mtd, 0, chip->ecc.bytes);
+		while(readl(RS_CTL_REG) & 0x00000001);
+	}
+	status = chip->waitfunc(mtd, chip);
+
+	return status & NAND_STATUS_FAIL ? -EIO : 0;
+#endif
+}
+#endif
 
 static void im98xx_nand_read_block_mark(struct mtd_info *mtd, int page, uint8_t *buf)
 {
@@ -627,6 +705,47 @@ static int im98xx_scan_boot_region(struct mtd_info *mtd)
 
 	return 0;
 }
+
+/**
+ * nand_block_bad - [DEFAULT] Read bad block marker from the chip
+ * @mtd:	MTD device structure
+ * @ofs:	offset from device start
+ * @getchip:	0, if the chip is already selected
+ *
+ * Check, if the block is bad.
+ */
+static int im98xx_nand_block_bad(struct mtd_info *mtd, loff_t ofs, int getchip)
+{
+	int page, res = 0;
+//	int chipnr;
+	struct nand_chip *chip = mtd->priv;
+	u16 bad;
+
+	page = (int)(ofs >> chip->page_shift) & chip->pagemask;
+
+	if (chip->options & NAND_BUSWIDTH_16) {
+		chip->cmdfunc(mtd, NAND_CMD_READOOB, (chip->badblockpos & 0xFE), page);
+		chip->waitfunc(mtd, chip);
+		chip->cmd_ctrl(mtd, NAND_CMD_READ0, (NAND_CTRL_CLE | NAND_CTRL_CHANGE));
+		bad = cpu_to_le16(chip->read_word(mtd));
+		if (chip->badblockpos & 0x1)
+			bad >>= 8;
+		if ((bad & 0xFF) != 0xff)
+			res = 1;
+	} else {
+		chip->cmdfunc(mtd, NAND_CMD_READOOB, chip->badblockpos, page);
+		chip->waitfunc(mtd, chip);
+		chip->cmd_ctrl(mtd, NAND_CMD_READ0, (NAND_CTRL_CLE | NAND_CTRL_CHANGE));
+		if (chip->read_byte(mtd) != 0xff)
+			res = 1;
+	}
+#if 0
+	if (getchip)
+		nand_release_device(mtd);
+#endif
+	return res;
+}
+
 
 /*
  * This function is called during the driver binding process.
@@ -671,7 +790,7 @@ static int __init im98xx_nand_probe(struct device_d *dev)
 	this->chip_delay = 5;
 
 	this->priv = host;
-//	this->dev_ready = im98xx_nand_dev_ready;
+	this->dev_ready = im98xx_nand_dev_ready;
 	this->cmdfunc = im98xx_nand_command;
 	this->cmd_ctrl = im98xx_nand_hwcontrol;
 	this->read_byte = im98xx_nand_read_byte;
@@ -692,6 +811,8 @@ static int __init im98xx_nand_probe(struct device_d *dev)
 	this->ecc.prepad = 6;
 	this->ecc.bytes = 10;
 	this->ecc.layout = &im98xx_hw_eccoob_page;
+	this->block_bad	= im98xx_nand_block_bad;
+
 
 	/* Reset NAND */
 	this->cmdfunc(mtd, NAND_CMD_RESET, -1, -1);
@@ -701,6 +822,9 @@ static int __init im98xx_nand_probe(struct device_d *dev)
 		err = -ENXIO;
 		goto escan;
 	}
+
+	if (mtd->writesize == 4096)
+		this->ecc.layout = &im98xx_hw_eccoob_page_4K;
 
 	/* second phase scan */
 	if (nand_scan_tail(mtd)) {
