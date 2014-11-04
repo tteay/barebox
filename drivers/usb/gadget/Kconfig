@@ -1,6 +1,6 @@
 config USB_HAVE_GADGET_DRIVER
 	bool
-	default y if ARCH_IMX || ARCH_MXS || ARCH_AT91 || ARCH_PXA
+	default y if ARCH_IMX || ARCH_MXS || ARCH_AT91 || ARCH_PXA || ARCH_IM98XX
 
 menuconfig USB_GADGET
 	depends on USB_HAVE_GADGET_DRIVER
@@ -33,6 +33,13 @@ config USB_GADGET_DRIVER_PXA27X
 	bool
 	prompt "PXA27x gadget driver"
 	depends on ARCH_PXA
+	select USB_GADGET_DUALSPEED
+	select POLLER
+
+config USB_GADGET_DRIVER_IM98XX
+	bool
+	prompt "im98xx gadget driver"
+	depends on ARCH_IM98XX
 	select USB_GADGET_DUALSPEED
 	select POLLER
 endchoice

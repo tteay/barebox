@@ -70,6 +70,9 @@
 #include <mach/magic.h>
 #include <mach/mem_map.h>
 
+#include <mach/im98xx_udc.h>
+#include <usb/ch9.h>
+
 
 static struct IM98XX_plat serial_plat = {
 	.clock		= 26000000,	/* 26MHz */
@@ -101,6 +104,92 @@ static int im98xx_console_init(void)
 	return platform_device_register(&im98xx_serial_device);
 }
 console_initcall(im98xx_console_init);
+
+#if defined(CONFIG_USB_GADGET_DRIVER_IM98XX)
+#define GPIO_USB_DET 1
+#define INT_USB				14	/* USB INTERRUPT */
+
+static struct resource im98xx_udc_resources[] = {
+	[0] = {
+		.start	= USBDEV_base,
+		.end	= USBDEV_base + 0x25c,
+		.flags	= IORESOURCE_MEM,
+	},
+	[1] = {
+		.start	= INT_USB,
+		.end	= INT_USB,
+		.flags	= IORESOURCE_IRQ,
+	},
+};
+
+/*
+   the value of parameter "addr" must >= 1, the total size of EP FIFO
+   is 4KB(address space, 2kB), including EP0
+ */
+#define CEP_MAXPKT		64
+#define EP_MAXPKT		512
+#define CEP_FIFO_SIZE		64	// RAM buffer space >= MPS
+#define EP_FIFO_SIZE		512	// RAM buffer space >= MPS
+#define CEP_FIFO_START_ADDR	0
+#define EP_FIFO_START(addr)	((CEP_FIFO_SIZE + ((addr) - 1) * EP_FIFO_SIZE) / 2)
+/*
+static struct im98xx_ep_data im98xx_udc_ep[] = {
+	EP("ep0", 0, CEP_MAXPKT, CEP_FIFO_START_ADDR, CEP_FIFO_SIZE, 0,
+		USB_ENDPOINT_XFER_CONTROL, EP_TRSACTION_ONE, EP_IN_MODE_AUTO),
+	EP("ep1", 1, EP_MAXPKT, EP_FIFO_START(1), EP_FIFO_SIZE, 0,
+		USB_ENDPOINT_XFER_BULK, EP_TRSACTION_ONE, EP_IN_MODE_AUTO),
+	EP("ep2", 2, EP_MAXPKT, EP_FIFO_START(2), EP_FIFO_SIZE, 0,
+		USB_ENDPOINT_XFER_BULK, EP_TRSACTION_ONE, EP_IN_MODE_AUTO),
+	EP("ep3", 3, EP_MAXPKT, EP_FIFO_START(3), EP_FIFO_SIZE, 0,
+		USB_ENDPOINT_XFER_BULK, EP_TRSACTION_ONE, EP_IN_MODE_AUTO),
+	EP("ep4", 4, EP_MAXPKT, EP_FIFO_START(4), EP_FIFO_SIZE, 0,
+		USB_ENDPOINT_XFER_BULK, EP_TRSACTION_ONE, EP_IN_MODE_AUTO),
+	EP("ep5", 5, EP_MAXPKT, EP_FIFO_START(5), EP_FIFO_SIZE, 0,
+		USB_ENDPOINT_XFER_BULK, EP_TRSACTION_ONE, EP_IN_MODE_AUTO),
+	EP("ep6", 6, EP_MAXPKT, EP_FIFO_START(6), EP_FIFO_SIZE, 0,
+		USB_ENDPOINT_XFER_BULK, EP_TRSACTION_ONE, EP_IN_MODE_AUTO),
+};
+*/
+static struct im98xx_udc_data im98xx_udc_data ={
+	.pdata ={
+		.usb_cable_gpio = GPIO_USB_DET,
+		.num_ep = ARRAY_SIZE(im98xx_udc_data.ep),
+		.ep = &im98xx_udc_data.ep,
+	},
+	.ep ={
+		EP("ep0", 0, CEP_MAXPKT, CEP_FIFO_START_ADDR, CEP_FIFO_SIZE, 0,
+			USB_ENDPOINT_XFER_CONTROL, EP_TRSACTION_ONE, EP_IN_MODE_AUTO),
+		EP("ep1", 1, EP_MAXPKT, EP_FIFO_START(1), EP_FIFO_SIZE, 0,
+			USB_ENDPOINT_XFER_BULK, EP_TRSACTION_ONE, EP_IN_MODE_AUTO),
+		EP("ep2", 2, EP_MAXPKT, EP_FIFO_START(2), EP_FIFO_SIZE, 0,
+			USB_ENDPOINT_XFER_BULK, EP_TRSACTION_ONE, EP_IN_MODE_AUTO),
+		EP("ep3", 3, EP_MAXPKT, EP_FIFO_START(3), EP_FIFO_SIZE, 0,
+			USB_ENDPOINT_XFER_BULK, EP_TRSACTION_ONE, EP_IN_MODE_AUTO),
+		EP("ep4", 4, EP_MAXPKT, EP_FIFO_START(4), EP_FIFO_SIZE, 0,
+			USB_ENDPOINT_XFER_BULK, EP_TRSACTION_ONE, EP_IN_MODE_AUTO),
+		EP("ep5", 5, EP_MAXPKT, EP_FIFO_START(5), EP_FIFO_SIZE, 0,
+			USB_ENDPOINT_XFER_BULK, EP_TRSACTION_ONE, EP_IN_MODE_AUTO),
+		EP("ep6", 6, EP_MAXPKT, EP_FIFO_START(6), EP_FIFO_SIZE, 0,
+			USB_ENDPOINT_XFER_BULK, EP_TRSACTION_ONE, EP_IN_MODE_AUTO),
+	}
+};
+
+/*
+ * pdata doesn't have room for any endpoints, so we need to
+ * append room for the ones we need right after it.
+ */
+
+static struct device_d im98xx_udc_device = {
+	.name		= "im98xx-udc",
+	.id		= -1,
+	.platform_data	= &im98xx_udc_data,
+	.resource	= im98xx_udc_resources,
+	.num_resources	= ARRAY_SIZE(im98xx_udc_resources),
+};
+
+#endif
+
+
 /*
 static struct memory_platform_data sram_pdata = {
 	.name	= "ram0",
@@ -214,6 +303,7 @@ static int im98xx_devices_init(void)
 	platform_device_register(&cfi_dev);
 	platform_device_register(&nand_dev);
 	platform_device_register(&network_dev);
+	platform_device_register(&im98xx_udc_device);
 
 /*already added when im98xx_mem_init is called
 		add_generic_device("mem", DEVICE_ID_DYNAMIC, "ram0", 0x43800000,

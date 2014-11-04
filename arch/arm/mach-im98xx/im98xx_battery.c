@@ -37,6 +37,7 @@
 #include <fs.h>
 
 #include <mach/hippo_showbat.h>
+#include "mach/gpio.h"
 
 #define FALSE	0
 #define TRUE	1
@@ -88,41 +89,6 @@ static unsigned long epoch = 1900;	/* year corresponding to 0x00	*/
 extern unsigned short im98xx_measure_adc_average(unsigned short u16_sample_cnt, unsigned short u16_filter_cnt);
 extern void pmic_2504b_auto_trim(unsigned short u16_sample, unsigned short u16_filter);
 extern void im98xx_save_auto_trim(void);
-
-unsigned int gpio_line_get_input(unsigned int line)
-{
-	return (readl(GPIO_IN_REG) & (1 << line));
-}
-
-void gpio_line_config(unsigned int line, unsigned int direction)
-{
-	unsigned int val = readl(GPIO_OEN_REG);
-
-	if (direction == GPIO_INPUT) {
-		val |= (1 << line);
-	} else if (direction == GPIO_OUTPUT) {
-		val &= ~(1 << line);
-	} else {
-		return;
-	}
-
-	writel(val, GPIO_OEN_REG);
-}
-
-void gpio_line_set_output(unsigned int line, unsigned int value)
-{
-	unsigned int val = readl(GPIO_OUT_REG);
-
-	if (value == GPIO_LOW) {
-		val &= ~(1 << line);
-	} else if (value == GPIO_HIGH) {
-		val |= (1 << line);
-	} else {
-		return;
-	}
-
-	writel(val, GPIO_OUT_REG);
-}
 
 void turn_backlight(bool on)
 {
