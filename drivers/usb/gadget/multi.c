@@ -21,7 +21,7 @@
 #define DRIVER_DESC		"Multifunction Composite Gadget"
 
 /***************************** Device Descriptor ****************************/
-
+#if 1 //for fastboot function need set usbgadget.vendor=0x18d1  usbgadget.product=0x0001 at user space
 #define MULTI_VENDOR_NUM	0x1d6b	/* Linux Foundation */
 #define MULTI_PRODUCT_NUM	0x0104	/* Multifunction Composite Gadget */
 
@@ -35,13 +35,28 @@ static struct usb_device_descriptor device_desc = {
 	.bDeviceSubClass =	2,
 	.bDeviceProtocol =	1,
 };
+#else
 
+#define MULTI_VENDOR_NUM		0x18D1
+#define MULTI_PRODUCT_NUM		0x0001
+
+static struct usb_device_descriptor device_desc = {
+	.bLength              = sizeof(device_desc),
+	.bDescriptorType      = USB_DT_DEVICE,
+	.bcdUSB               = cpu_to_le16(0x0200),
+	.bDeviceClass         = USB_CLASS_PER_INTERFACE,
+	.idVendor             = cpu_to_le16(MULTI_VENDOR_NUM),
+	.idProduct            = cpu_to_le16(MULTI_PRODUCT_NUM),
+	.bcdDevice            = cpu_to_le16(0xffff),
+	.bNumConfigurations   = 1,
+};
+#endif
 #define STRING_DESCRIPTION_IDX	USB_GADGET_FIRST_AVAIL_IDX
 
 static struct usb_string strings_dev[] = {
 	[USB_GADGET_MANUFACTURER_IDX].s = "",
 	[USB_GADGET_PRODUCT_IDX].s = "",
-	[USB_GADGET_SERIAL_IDX].s = "",
+	[USB_GADGET_SERIAL_IDX].s = "0123456789ABCDEF",
 	[STRING_DESCRIPTION_IDX].s = "Multifunction Composite Gadget",
 	{  } /* end of list */
 };
@@ -180,6 +195,10 @@ static int multi_bind(struct usb_composite_dev *cdev)
 	strings_dev[USB_GADGET_MANUFACTURER_IDX].s = gadget->manufacturer;
 	strings_dev[USB_GADGET_PRODUCT_IDX].s = gadget->productname;
 
+
+    device_desc.iSerialNumber = strings_dev[USB_GADGET_SERIAL_IDX].id;
+	device_desc.iManufacturer = strings_dev[USB_GADGET_MANUFACTURER_IDX].id;
+	
 	device_desc.iProduct = strings_dev[USB_GADGET_PRODUCT_IDX].id;
 
 	config.label          = strings_dev[STRING_DESCRIPTION_IDX].s;

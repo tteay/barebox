@@ -5,7 +5,7 @@ export ARCH=arm
 export CROSS_COMPILE=arm-eabi-
 
 
-if [ "$1" = "distclean" ]|| [ "$1" = "clean" ]; then
+if [ "$1" = "c" ] || [ "$1" = "C" ]; then
         make distclean
 fi
 
