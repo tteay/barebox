@@ -107,6 +107,28 @@ void im98xx_pm_init(void)
 	writel(readl(BB_PWR_CTL_REG) & ~(0x00000031), BB_PWR_CTL_REG);
 }
 
+void im98xx_init_lowlevel()
+{
+	__asm__ __volatile__ (
+
+//*******************************************************************************
+//Enable TCM in supervisor mode
+//*******************************************************************************
+    "LDR r1,=0xFFFF0015\n"
+    "LDR r2,=0xFFFF4015\n"   
+     
+    "MCR p15,0,r2,c9,c1,0\n"  // write to data TCM region register 
+    "MCR p15,0,r1,c9,c1,1\n"  // write to inst TCM region register, last "1": as ITCM 
+
+//**********************************************************************************
+// map vector base from 0x0000_0000 to 0xFFFF_0000, so as vector.o of vector.s
+// [13]=0 (determiend by hardware @reset), 0: 0x0000_0000, 1: 0xFFFF_0000 ~ ... 1C
+//**********************************************************************************
+    "MRC     p15, 0, r0, c1, c0, 0\n"       // read  c1 of cp15 into r0
+    "ORR     r0, r0, #(0x1 <<13)\n"         // enable Hi Vectors
+    "MCR     p15, 0, r0, c1, c0, 0\n"       // write c1 of cp15 from r0
+	);
+}
 void arch_init_lowlevel(void)
 {
 #if defined(CONFIG_IM98XX_BL_PM_CONFIG)
@@ -118,6 +140,7 @@ void arch_init_lowlevel(void)
 //	sdelay(520 * 200);
 	im98xx_udelay(10);
 #endif
+	im98xx_init_lowlevel();
 #if defined(CONFIG_IM98XX_BL_PM_CONFIG)
 	im98xx_pm_init();
 #endif
