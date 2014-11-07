@@ -37,7 +37,7 @@ if [ x$1 = xnet ]; then
 	fi
 
 	tftp $boot_image android_bootimg || exit 1
-	bootimg android_bootimg
+	bootm android_bootimg
 fi
 
 if [ x$1 = xnand ]; then
@@ -55,11 +55,11 @@ if [ x$1 = xnand ]; then
 		echo "Enter rtc alarm mode boot up procedure:"
 		echo "Barebox => Kernel partition is starting to load ..."
 		bootargs="$bootargs androidboot.mode=alarm_rtc"
-		bootimg /dev/nand0.boot
+		bootm /dev/nand0.boot
 	else
 		echo "System boot up procedure:"
 		echo "Barebox => Kernel partition is starting to load ..."
-		bootimg /dev/nand0.boot
+		bootm /dev/nand0.boot
 	fi
 fi
 

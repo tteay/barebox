@@ -490,13 +490,13 @@ static int do_bootm_aimage(struct image_data *data)
 			goto err_out;
 		}
 	}
-
+/* //focus use barebox command line ,it will be unmark when command parm is correct on boot image
 	if (!getenv("aimage_noverwrite_bootargs"))
 		linux_bootargs_overwrite(header->cmdline);
 
 	if (!getenv("aimage_noverwrite_tags"))
 		armlinux_set_bootparams((void*)header->tags_addr);
-
+*/
 	cmp = &header->second_stage;
 	if (cmp->size) {
 		void (*second)(void);
