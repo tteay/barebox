@@ -13,5 +13,17 @@ fastboot use:
 PS:now only can download boot,because boot not use filesystem.
     system use yaffs2,but now barebox do not support yaffs filesystem and like yaffs2format command
 
+sdram useage
+Name	start	end	
+			
+malloc space	0x42300000(0xb500000)	0x4d800000-1	
+barebox	0x4d800000(0x30c23)	0x4d830c23-1	
+Barebox data	0x4d830c23(0x3e75)	0x4d834a98-1	
+Barebox bss	0x4d834a98(0x2580)	0x4D837018-1	we may need more spare for barebox
+stack	0x4f000000(0x10000000)	0x50000000-1	
+PS: 1.Kernel May be start fail at base address 0x43800000,if we download system image(more than 150MB ,may be 180MB)first,
+    because when download system ,it will occupy kernel space .
+    2.if can't download system image we may modify stack and malloc size.
+
 TODO:need unmarsk arch/arm/lib/bootm.c code"getenv("aimage_noverwrite_bootargs")", when command line is correct from kernel image
 
