@@ -13,3 +13,5 @@ fastboot use:
 PS:now only can download boot,because boot not use filesystem.
     system use yaffs2,but now barebox do not support yaffs filesystem and like yaffs2format command
 
+TODO:need unmarsk arch/arm/lib/bootm.c code"getenv("aimage_noverwrite_bootargs")", when command line is correct from kernel image
+
