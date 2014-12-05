@@ -5,3 +5,4 @@ obj-y					+= devices/
 obj-$(CONFIG_MTD)			+= core.o partition.o
 obj-$(CONFIG_MTD_OOB_DEVICE)		+= mtdoob.o
 obj-$(CONFIG_MTD_RAW_DEVICE)		+= mtdraw.o
+obj-$(CONFIG_MTD_FLASH_DEVICE)		+= mtdflash.o

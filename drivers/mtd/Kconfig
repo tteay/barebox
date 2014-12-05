@@ -20,6 +20,12 @@ config MTD_RAW_DEVICE
 	default n
 	prompt "mtdraw device to read/write both data+oob"
 
+config MTD_FLASH_DEVICE
+	bool
+	select NAND_READ_OOB if NAND
+	default n
+	prompt "mtdflash device to read/write both data+oob & skip badblock"
+
 source "drivers/mtd/devices/Kconfig"
 source "drivers/mtd/nor/Kconfig"
 source "drivers/mtd/nand/Kconfig"
