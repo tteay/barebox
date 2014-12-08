@@ -24,7 +24,13 @@ config MTD_FLASH_DEVICE
 	bool
 	select NAND_READ_OOB if NAND
 	default n
-	prompt "mtdflash device to read/write both data+oob & skip badblock"
+	prompt "mtdflash device to read/write both data+oob"
+
+config MTD_FLASH_SKIP_BB
+	bool
+	depends on MTD_FLASH_DEVICE
+	default y
+	prompt "mtdflash device to read/write with badblock skip"
 
 source "drivers/mtd/devices/Kconfig"
 source "drivers/mtd/nor/Kconfig"
