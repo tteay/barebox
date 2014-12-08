@@ -826,12 +826,6 @@ static int __init im98xx_nand_probe(struct device_d *dev)
 	if (mtd->writesize == 4096)
 		this->ecc.layout = &im98xx_hw_eccoob_page_4K;
 
-	/* second phase scan */
-	if (nand_scan_tail(mtd)) {
-		err = -ENXIO;
-		goto escan;
-	}
-
 	//add_mtd_device(mtd);
 	add_mtd_nand_device(mtd, "nand");
 
