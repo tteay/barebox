@@ -180,8 +180,10 @@ static size_t mtdflash_badblk_copy(struct mtd_info *mtd, const ulong from_offset
 	int from_blk = (from_offset /mtd->erasesize)*mtd->erasesize;
     int pagecount= (from_offset % mtd->erasesize)/mtd->writesize;
     int to_blk = (to_offset /mtd->erasesize)*mtd->erasesize;
-
-	pr_err("%s() from_offset:0x%08x,to_offset:0x%08x\n",__func__,from_offset,to_offset);
+#ifdef TEST_CODE
+    static int test = 0;
+#endif
+	pr_err("%s() from_offset:0x%08x,to_offset:0x%08x\n",__func__,(int)from_offset,(int)to_offset);
     memset(buf, 0, sizeof(buf));
 
     while(pageno <= pagecount){
@@ -198,7 +200,12 @@ static size_t mtdflash_badblk_copy(struct mtd_info *mtd, const ulong from_offset
 		}
         pageno++;
     }
-
+#ifdef TEST_CODE
+    if(test == 0){
+		test += 1;
+		return -1;
+    }
+#endif
 	return ret;
 }
 
@@ -249,8 +256,12 @@ static ssize_t mtdflash_write(struct cdev *cdev, const void *buf, size_t count,
 	size_t retlen = 0, tofill;
 	unsigned long offset = _offset;
 	int ret = 0;
+#ifdef CONFIG_MTD_FLASH_DBG
+	static int k=0;
 	int i=0;
 
+	if(k<=3)pr_emerg("\n\n<<<<<<<mtd->size:%x,offset:0x%x,mtd->master_offset:0x%x,count:0x%x>>>>>>>>\n\n",(int)mtd->size,(int)offset,(int)mtd->master_offset,count);
+#endif
 	if(_offset == 0)
 		mtdflash->skip_bad = 0;
 
@@ -274,6 +285,9 @@ static ssize_t mtdflash_write(struct cdev *cdev, const void *buf, size_t count,
 
 	if (mtdflash->write_fill == bsz) {
 		numpage = mtdflash->write_ofs / (mtd->writesize + mtd->oobsize);
+#ifdef CONFIG_MTD_FLASH_DBG
+		if(k<=3)pr_emerg("write size equal page size numpage:%x\n",(int)numpage);
+#endif
 #ifdef	CONFIG_MTD_FLASH_SKIP_BB
 		do{
 			ret = mtd_block_isbad(mtd,  mtd->writesize * numpage + mtdflash->skip_bad);
@@ -284,35 +298,92 @@ static ssize_t mtdflash_write(struct cdev *cdev, const void *buf, size_t count,
 			}
 		}while(ret>0);//skip bad blocks
 #endif
-		ret = mtdflash_blkwrite(mtd, mtdflash->writebuf,
+#ifdef TEST_CODE
+		if(130 == numpage){
+            pr_err(" -------%s() ==========1=\n",__func__);
+            ret = -1;
+        }else {
+			ret = mtdflash_blkwrite(mtd, mtdflash->writebuf,
 				      mtdflash->skip_bad + mtd->writesize * numpage);
+        }
+#else
+		ret = mtdflash_blkwrite(mtd, mtdflash->writebuf,
+		          mtdflash->skip_bad + mtd->writesize * numpage);
+#endif
 		if(ret < 0){
 			ret = mtdflash_badblk_process(mtdflash,mtdflash->skip_bad + mtd->writesize * numpage);
 		}
-		mtdflash->write_fill = 0;
 
+		mtdflash->write_fill = 0;
+#ifdef CONFIG_MTD_FLASH_DBG
+		if(k<=3){
+			uint8_t 	datbuf[2112];
+			memset(datbuf,0,2112);
+			ret = mtdflash_read_unaligned(mtd, datbuf, mtd->writesize+mtd->oobsize,
+									0, mtd->writesize * numpage + mtdflash->skip_bad);
+			printk("****read start %d****\nread data:\n",i);
+			for(i=0;i<32;i++)
+				printk("0x%x,",datbuf[i]);
+			printk("******read data end\n******oob data:\n");
+			for(i= mtd->writesize;i<(mtd->writesize+mtd->oobsize);i++){
+				printk("0x%x,",datbuf[i]);
+			}
+			printk("****read end****\n");
+			k++;
+		}
+#endif
 	}
 
 	numpage = offset / (mtd->writesize + mtd->oobsize);
+#ifdef CONFIG_MTD_FLASH_DBG
+	if(k<=3)pr_emerg("numpage:%x\n",(int)numpage);
+#endif
 	while (ret >= 0 && count >= bsz) {
 #ifdef	CONFIG_MTD_FLASH_SKIP_BB
 		do{
 			ret = mtd_block_isbad(mtd,  mtd->writesize * numpage + mtdflash->skip_bad);
 
 			if (ret > 0) {
+				printf("Skipping bad block at 0x%08x\n", (int)(mtd->writesize * numpage + mtdflash->skip_bad));
 				mtdflash->skip_bad += mtd->erasesize;
-				printf("Skipping bad block at 0x%08x\n", mtd->writesize * numpage + mtdflash->skip_bad);
 			}
 		}while(ret>0);//skip bad blocks
 #endif
+#ifdef TEST_CODE
+	    if(130 == numpage){//2K/page 128K/blk
+	        pr_err(" -------%s() ==========2=\n",__func__);
+	        ret = -1;
+	    }else {
+			ret = mtdflash_blkwrite(mtd, buf + retlen,
+			   mtdflash->skip_bad + mtd->writesize * numpage++);
+		}
+#else
 		ret = mtdflash_blkwrite(mtd, buf + retlen,
 				   mtdflash->skip_bad + mtd->writesize * numpage++);
+#endif
 		if(ret < 0){
 			ret = mtdflash_badblk_process(mtdflash,mtdflash->skip_bad + mtd->writesize * numpage);
 		}
 		count -= ret;
 		retlen += ret;
 		offset += ret;
+#ifdef CONFIG_MTD_FLASH_DBG
+		if( k <= 3 ) {
+			uint8_t		datbuf[2112];
+			memset(datbuf,0,2112);
+			ret = mtdflash_read_unaligned(mtd, datbuf, mtd->writesize+mtd->oobsize,
+									0, mtd->writesize * (numpage-1) + mtdflash->skip_bad);
+			printk("****read start %d****\nread data:\n",i);
+			for(i=0;i<32;i++)
+				printk("0x%x,",datbuf[i]);
+			printk("******read data end\n******oob data:\n");
+			for(i= mtd->writesize;i<(mtd->writesize+mtd->oobsize);i++){
+				printk("0x%x,",datbuf[i]);
+			}
+			printk("****read end****\n");
+			k++;
+		}
+#endif
 	}
 
 	if (ret >= 0 && count) {
@@ -442,10 +513,16 @@ static int mtd_part_read_oob(struct mtd_info *mtd, loff_t from,
 			struct mtd_oob_ops *ops)
 {
 	int res;
-
+#ifdef CONFIG_MTD_FLASH_DBG
+	static int k=0;
+	if(k<3){
+		pr_emerg("%s ,mtd:%p,name:%s master_offset:0x%x,from:0x%x\n",__func__,mtd,mtd->name,(int)mtd->master_offset,(int)from);
+		k++;
+	}
+#endif
 	if (from >= mtd->size)
 		return -EIO;
-		res = mtd->master->read_oob(mtd->master, from + mtd->master_offset,
+	res = mtd->master->read_oob(mtd->master, from + mtd->master_offset,
 				ops);
 	return res;
 }
@@ -453,6 +530,13 @@ static int mtd_part_read_oob(struct mtd_info *mtd, loff_t from,
 static int mtd_part_write_oob(struct mtd_info *mtd, loff_t to,
 			 struct mtd_oob_ops *ops)
 {
+#ifdef CONFIG_MTD_FLASH_DBG
+	static int k=0;
+	if(k<3){
+		pr_emerg("%s ,mtd:%p,name:%s master_offset:0x%x,to:0x%x\n",__func__,mtd,mtd->name,(int)mtd->master_offset,(int)to);
+		k++;
+	}
+#endif
 	if (!(mtd->flags & MTD_WRITEABLE))
 		return -EROFS;
 	if (to >= mtd->size)

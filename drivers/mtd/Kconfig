@@ -32,6 +32,12 @@ config MTD_FLASH_SKIP_BB
 	default y
 	prompt "mtdflash device to read/write with badblock skip"
 
+config MTD_FLASH_DBG
+	bool
+	depends on MTD_FLASH_DEVICE
+	default n
+	prompt "mtdflash device debug"
+
 source "drivers/mtd/devices/Kconfig"
 source "drivers/mtd/nor/Kconfig"
 source "drivers/mtd/nand/Kconfig"
