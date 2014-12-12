@@ -19,15 +19,41 @@ if [ -e /dev/factory0 ]; then
 else
 	echo "Could not find /dev/factory0"
 fi
-
 if [ -e /env/bin/download_boot ]; then
-	echo "Enter download mode:"
-        if [ -e /dev/ramloader0 ]; then
-                cp /dev/ramloader0 /dev/ram1
-                go 0x1FFE0000
-        else
-                echo "Can not find ramloader"
-        fi
+	echo "Enter fastboot mode:"
+	echo "Download ARM7 Vector SDRAM"
+	a7_vector_sdram
+
+	echo "Open Dual SIM LDO Voltage as 3.3(V)"
+	sim_open 3
+
+	if [ -e /dev/nand0 ]; then
+		addpart /dev/nand0 $nand_parts
+
+		echo "Download ARM7 image from NAND to SDRAM"
+		# PS Modem size is less than 4M
+		memcpps -l -s /dev/nand0.modem -d /dev/mem 0x0 0x40000000 6M
+	fi
+	usbgadget.vendor=0x18d1
+	usbgadget.product=0x0001
+	usbgadget -A /dev/nand0.raw(badblk),dev/nand0.boot(boot),/dev/nand0.system.fsh(system)
+
+	echo
+	echo "type 'boot net [<imagename>]' to load Android Boot Image from Ethernet"
+	echo "type 'boot nand' to load Android Boot Image from NAND Flash"
+	echo "type 'usb_download net <imagename>' to load ramloader for USB Downloader"
+	echo "type 'usb_download nand' to load ramloader for USB Downloader"
+	echo
+	exit
+
+#elif [ -e /env/bin/download_boot ]; then
+#	echo "Enter download mode:"
+#        if [ -e /dev/ramloader2 ]; then
+#                cp /dev/ramloader0 /dev/ram1
+#                go 0x1FFE0000
+#        else
+#                echo "Can not find ramloader"
+#        fi
 else
 	echo "Enter normal mode:"
 	echo "Download ARM7 Vector SDRAM"
