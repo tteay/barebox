@@ -165,6 +165,74 @@ static ssize_t mtdflash_blkwrite(struct mtd_info *mtd, const void *buf,
 	return ret;
 }
 
+/*
+*mtdflash_blkcopy:copy bad block data to new block
+*@from_offset:old block page fail address
+*@to_offset:new block page address so need to get blk start page from it.
+*/
+static size_t mtdflash_badblk_copy(struct mtd_info *mtd, const ulong from_offset,
+			const ulong to_offset)
+{
+	int		ret = 0;
+    size_t	retlen = 0;
+    uint8_t	buf[4096];
+    ulong pageno = 0;
+	int from_blk = (from_offset /mtd->erasesize)*mtd->erasesize;
+    int pagecount= (from_offset % mtd->erasesize)/mtd->writesize;
+    int to_blk = (to_offset /mtd->erasesize)*mtd->erasesize;
+
+	pr_err("%s() from_offset:0x%08x,to_offset:0x%08x\n",__func__,from_offset,to_offset);
+    memset(buf, 0, sizeof(buf));
+
+    while(pageno <= pagecount){
+		ret = mtdflash_read_unaligned(mtd, buf, mtd->writesize + mtd->oobsize,
+									0, from_blk + mtd->writesize*pageno );
+		if ( ret <= 0 ||(ret !=  (mtd->writesize + mtd->oobsize)))
+			pr_err("%s call mtdflash_read_unaligned fail ret:%d\n",__func__,ret);
+
+	    ret = mtdflash_blkwrite(mtd, buf,
+					   to_blk + mtd->writesize*pageno);
+	    if ( ret < 0) {
+			pr_err("%s call mtdflash_blkwrite fail ret:%d\n",__func__,ret);
+            return ret;
+		}
+        pageno++;
+    }
+
+	return ret;
+}
+
+/*
+*mtdflash_badblk_process:mark blk as bad,get new blk,copy data to new blk
+*@offset:page fail address
+*/
+static size_t mtdflash_badblk_process(struct mtdflash *mtdflash, const ulong offset)
+{
+	struct mtd_info *mtd = mtdflash->mtd;
+	int ret = 0;
+	ulong ofs = offset;//ofs new blk pos
+
+	do{
+        pr_err("%s call  mtd_block_markbad from:0x%08x,to:0x%08x\n",__func__, (int)offset,(int)ofs);
+	    mtd_block_markbad(mtd, ofs);
+		ofs += mtd->erasesize;
+		do{
+			ret = mtd_block_isbad(mtd,  ofs);
+			if (ret > 0) {
+				pr_err("%s Skipping bad block at 0x%08x\n",__func__, (int)ofs);
+				ofs += mtd->erasesize;
+			}
+		}while(ret > 0);//skip bad blocks
+		//add check size
+		ret = mtdflash_badblk_copy(mtd, offset,ofs);
+		if(ret < 0){
+			pr_err("%s call mtdflash_badblk_copy fail! address:0x%x\n",__func__,(int)offset);
+		}
+	}while(ret < 0);//when success return
+	mtdflash->skip_bad += ofs - offset;
+	return ret;
+}
+
 static void mtdflash_fillbuf(struct mtdflash *mtdflash, const void *src, int nbbytes)
 {
 	memcpy(mtdflash->writebuf + mtdflash->write_fill, src, nbbytes);
@@ -187,7 +255,7 @@ static ssize_t mtdflash_write(struct cdev *cdev, const void *buf, size_t count,
 		mtdflash->skip_bad = 0;
 
 	if(count + _offset + mtdflash->skip_bad > mtd->size){
-		pr_err("%s write offset + count +badblock > mtd->size\n",__func__,_offset,count,mtdflash->skip_bad,mtd->size);
+		pr_err("%s write offset:0x%x + count:0x%x +badblock:0x%x > mtd->size:0x%x\n",__func__,(int)_offset,count,(int)mtdflash->skip_bad,(int)mtd->size);
 		return -EINVAL;
 	}
 	if (mtdflash->write_fill &&
@@ -211,13 +279,16 @@ static ssize_t mtdflash_write(struct cdev *cdev, const void *buf, size_t count,
 			ret = mtd_block_isbad(mtd,  mtd->writesize * numpage + mtdflash->skip_bad);
 
 			if (ret > 0) {
+				printf("Skipping bad block at 0x%08x\n", (int)(mtd->writesize * numpage + mtdflash->skip_bad));
 				mtdflash->skip_bad += mtd->erasesize;//need check data + oob?
-				printf("Skipping bad block at 0x%08x\n", mtd->writesize * numpage + mtdflash->skip_bad);
 			}
 		}while(ret>0);//skip bad blocks
 #endif
 		ret = mtdflash_blkwrite(mtd, mtdflash->writebuf,
 				      mtdflash->skip_bad + mtd->writesize * numpage);
+		if(ret < 0){
+			ret = mtdflash_badblk_process(mtdflash,mtdflash->skip_bad + mtd->writesize * numpage);
+		}
 		mtdflash->write_fill = 0;
 
 	}
@@ -236,6 +307,9 @@ static ssize_t mtdflash_write(struct cdev *cdev, const void *buf, size_t count,
 #endif
 		ret = mtdflash_blkwrite(mtd, buf + retlen,
 				   mtdflash->skip_bad + mtd->writesize * numpage++);
+		if(ret < 0){
+			ret = mtdflash_badblk_process(mtdflash,mtdflash->skip_bad + mtd->writesize * numpage);
+		}
 		count -= ret;
 		retlen += ret;
 		offset += ret;
@@ -310,7 +384,7 @@ static int mtdflash_erase(struct cdev *cdev, size_t count, loff_t _offset)
 	struct erase_info erase;
 	unsigned long offset = _offset;
 	int ret;
-	pr_emerg("original offset %x count %x   ", offset, count);
+	pr_emerg("original offset %x count %x   ", (int)offset, count);
 
 	offset = offset / (mtd->writesize + mtd->oobsize) * mtd->writesize;
 	count = count / (mtd->writesize + mtd->oobsize) * mtd->writesize;
@@ -319,7 +393,7 @@ static int mtdflash_erase(struct cdev *cdev, size_t count, loff_t _offset)
 	erase.mtd = mtd;
 	erase.addr = offset;
 	erase.len = mtd->erasesize;
-	pr_emerg("calculate offset %x count %x\n", offset, count);
+	pr_emerg("calculate offset %x count %x\n", (int)offset, count);
 
 	while (count > 0) {
 		//pr_emerg("erase %x %x count %x\n", erase.addr, erase.len,count);
