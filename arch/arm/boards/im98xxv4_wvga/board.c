@@ -303,7 +303,9 @@ static int im98xx_devices_init(void)
 	platform_device_register(&cfi_dev);
 	platform_device_register(&nand_dev);
 	platform_device_register(&network_dev);
+#if defined(CONFIG_USB_GADGET_DRIVER_IM98XX)
 	platform_device_register(&im98xx_udc_device);
+#endif
 
 /*already added when im98xx_mem_init is called
 		add_generic_device("mem", DEVICE_ID_DYNAMIC, "ram0", 0x43800000,

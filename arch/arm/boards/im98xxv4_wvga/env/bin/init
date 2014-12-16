@@ -34,9 +34,11 @@ if [ -e /env/bin/download_boot ]; then
 		# PS Modem size is less than 4M
 		memcpps -l -s /dev/nand0.modem -d /dev/mem 0x0 0x40000000 6M
 	fi
-	usbgadget.vendor=0x18d1
-	usbgadget.product=0x0001
-	usbgadget -A /dev/nand0.raw(badblk),dev/nand0.boot(boot),/dev/nand0.system.fsh(system)
+	if [ -e /dev/nand0.boot] && [-e /dev/nand0.system.fsh]; then
+		usbgadget.vendor=0x18d1
+		usbgadget.product=0x0001
+		usbgadget -A dev/nand0.boot(boot),/dev/nand0.system.fsh(system)
+	fi
 
 	echo
 	echo "type 'boot net [<imagename>]' to load Android Boot Image from Ethernet"
