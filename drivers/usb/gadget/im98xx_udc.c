@@ -3240,6 +3240,10 @@ static int __init im98xx_udc_probe(struct device_d *dev)
 
 	/* Initialize a work */
 
+	pmuvolctl(udc, DEV_TYPE_VUSB, VUSB_SEL_3_2V);
+	usb_pll_clk_init(udc);
+	usb_device_reset(udc);
+
 #if 1
 	usb_irq_enb = udc_readb(udc, USB_IRQ_ENB);
 	//usb_irq_enb &= ~(USEBLE_CLK_EN | SOF_INT_EN | RSUM_INT_EN | SPNT_INT_EN | DMA_CMPET_INT_EN);
