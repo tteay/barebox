@@ -53,6 +53,8 @@ void im98xx_pll_init(void)
 	unsigned int u32_hclk_div = (0x2 << 24);
 	unsigned int val = 0;
 
+	writel(0x00,A9_CLK_CTL_REG);//switch to 26M first,avoid already use pll.
+
 	/* step.0 : > 0.5(s) delay for power supply stable */
 	//im98xx_26MHz_halt(500000, GPT1);
 	im98xx_udelay(500000);
